@@ -3,6 +3,7 @@ import PIL
 import numpy as np
 import sys, getopt
 import json
+import os
 
 # Torch libraries
 import torch
@@ -16,7 +17,7 @@ parser.add_argument('--data_dir', dest="data_dir", default="flowers", type=str)
 parser.add_argument('--save_dir', dest="save_dir", default="checkpoints", type=str)
 parser.add_argument('--learning_rate', dest="learning_rate", default=0.001, type=float)
 parser.add_argument('--hidden_units', dest="hidden_units", default=1024, type=int)
-parser.add_argument('--epochs', action="store", dest="epochs", default=1, type=int)
+parser.add_argument('--epochs', action="store", dest="epochs", default=20, type=int)
 parser.add_argument('--gpu', action="store_true", dest="gpu", default=True)
 parser.add_argument('--topk', action="store", dest="top_k", default=5, type=bool)
 parser.add_argument('--arch', action="store", dest="arch",default="vgg16", type=str)
@@ -40,7 +41,9 @@ device = torch.device("cuda" if (torch.cuda.is_available() and gpu) else "cpu")
 train_dir = data_dir + '/train'
 valid_dir = data_dir + '/valid'
 test_dir = data_dir + '/test'
-
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
+checkpoint_dir = save_dir + '/' + checkpoint_name
 # Set up transformations
 train_transforms = transforms.Compose([transforms.RandomRotation(30),
                                        transforms.RandomResizedCrop(224),
@@ -172,5 +175,5 @@ checkpoint = {'input_size': 25088,
               'class_to_idx': train_data.class_to_idx,
               'state_dict': model.state_dict()}
 
-torch.save(checkpoint, checkpoint_name)
+torch.save(checkpoint, checkpoint_dir)
 print(f'Training Complete! Checkpoint saved as {checkpoint_name}')
